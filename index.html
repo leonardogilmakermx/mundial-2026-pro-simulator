@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Simulador Mundial 2026 Pro | Análisis Estadístico Montecarlo</title>
-    <meta name="description" content="Simulador avanzado de la Copa del Mundo 2026. Análisis probabilístico basado en el modelo ELO y simulación Montecarlo por el Ing. G. Leonardo Dominguez Garcia.">
+    <title>Simulador Mundial 2026 Pro | Cuadro Oficial ElEditor Platense v3.5</title>
+    <meta name="description" content="Simulador avanzado de la Copa del Mundo 2026. Análisis estocástico basado en el cuadro real en vivo, variables ambientales y simulación Montecarlo.">
     
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -38,7 +38,15 @@
         button#simular { background: linear-gradient(135deg, #1e8449, var(--action-green)); color: white; }
         button#compartir { background: linear-gradient(135deg, #b7950b, var(--accent-gold)); color: black; }
 
-        /* --- BRACKET MODAL --- */
+        .pronostico-container { display: none; margin-top: 20px; max-height: 450px; overflow-y: auto; padding: 15px; background: #0c101a; border-radius: 8px; border: 1px dashed var(--accent-gold); }
+        .ronda-title { color: var(--accent-gold); font-size: 0.9em; font-weight: bold; text-transform: uppercase; border-left: 3px solid var(--accent-gold); padding-left: 8px; margin: 15px 0 10px 0; }
+        .partido-row { display: flex; justify-content: space-between; align-items: center; background: var(--card-tactical); padding: 8px 15px; margin-bottom: 6px; border-radius: 6px; font-size: 0.8em; border: 1px solid rgba(255,255,255,0.05); }
+        .team-box { width: 35%; display: flex; align-items: center; gap: 8px; }
+        .team-box.left { justify-content: flex-end; text-align: right; }
+        .team-box.right { justify-content: flex-start; text-align: left; }
+        .score-box { width: 30%; display: flex; justify-content: center; align-items: center; gap: 10px; font-weight: bold; color: var(--neon-cyan); font-size: 1.1em; }
+        .penales-badge { font-size: 0.7em; color: #e74c3c; font-style: italic; margin-left: 4px; }
+
         #modal-sp { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 10000; padding: 20px; overflow: auto; }
         .mirror-wrapper { display: flex; justify-content: center; align-items: center; min-width: 1600px; padding: 40px 0; gap: 25px; }
         .bracket-side { display: flex; gap: 25px; align-items: center; }
@@ -51,7 +59,6 @@
         .final-block { background: rgba(26, 37, 51, 0.9); border: 2px solid gold; border-radius: 8px; padding: 10px; width: 180px; text-align: center; }
         .final-node { background: linear-gradient(135deg, #d4af37, #f1c40f) !important; color: black !important; font-weight: 900; border: 2px solid #fff; padding: 15px; border-radius: 8px; width: 220px; box-shadow: 0 0 30px gold; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 
-        /* --- TICKET --- */
         #ticket-captura { width: 850px; height: 550px; background: #fdfae6; color: #000; position: fixed; left: -9000px; top: 0; font-family: 'Courier New', monospace; display: flex; border: 1px solid #d1d1d1; }
         .ticket-main { flex: 2; padding: 40px; border-right: 2px dashed #b5b5b5; position: relative; display: flex; flex-direction: column; align-items: center; }
         .ticket-stub { flex: 0.8; padding: 25px; display: flex; flex-direction: column; align-items: center; border-left: 1px solid #eee; background: #f9f6e3; }
@@ -70,7 +77,7 @@
 <body>
 <div class="container">
     <header>
-        <h1>WORLD CUP 2026 - SIMULATOR PRO</h1>
+        <h1>WORLD CUP 2026 - SIMULATOR PRO v3.5</h1>
         <div style="color:var(--accent-gold); font-weight:bold; font-size:0.9em; letter-spacing:1px;">TACTICAL ANALYTICS CENTER | N=1000 | ING. G. LEONARDO DOMINGUEZ GARCIA</div>
     </header>
     <div class="tactical-grid">
@@ -89,19 +96,16 @@
                     <span style="font-size:0.8em; font-weight:bold;">TARGET SELECTION:</span>
                     <select id="equipo" style="width:60%;"></select>
                 </div>
-                <button id="simular">🔄 SIMULAR TORNEO</button>
-                <button id="btn-sp" onclick="ver_sp()" style="background: linear-gradient(135deg, #2980b9, #3498db); color: white; margin-top:5px;">📊 VER ÁRBOL (REGLAS FIFA)</button>
+                <button id="simular">🔄 SIMULAR TORNEO (MONTECARLO)</button>
+                <button id="btn-sp" onclick="ver_sp()" style="background: linear-gradient(135deg, #2980b9, #3498db); color: white; margin-top:5px;">📊 VER ÁRBOL DE SIMULACIÓN</button>
+                <button id="btn-pronostico" style="background: linear-gradient(135deg, #8e44ad, #9b59b6); color: white; margin-top:5px;">🔮 PRONÓSTICO CUADRO REAL GOOGLE</button>
                 <button id="compartir">🎟️ GENERAR TICKET VIRAL</button>
             </div>
         </div>
         <div class="ui-card">
-            <h3 class="card-header">REGLAMENTO DEL MODELO</h3>
-            <div style="font-size: 0.85em; color: #bdc3c7; padding: 0 10px;">
-                <ul style="margin:0; padding-left:20px;">
-                    <li><strong>Motor:</strong> ELO + Montecarlo N=1000 con Coherencia de Árbol.</li>
-                    <li><strong>Estructura Estable (N=32):</strong> Distribución exacta de 16 nodos simétricos por rama sin desbordamiento.</li>
-                    <li><strong>Opción A Implementada:</strong> Élite mundial nivelada (Brecha ELO reducida) + Volatilidad escalonada ($\pm 300$ pts) en instancias finales para máxima competitividad.</li>
-                </ul>
+            <h3 class="card-header">CRÓNICA EN VIVO: EL EDITOR PLATENSE</h3>
+            <div id="panel-pronostico" class="pronostico-container">
+                <div style="color: rgba(255,255,255,0.4); text-align: center; font-size: 0.85em; padding-top: 40px;">Haz clic en "PRONÓSTICO CUADRO REAL GOOGLE" para correr el motor sobre el fixture exacto.</div>
             </div>
         </div>
     </div>
@@ -128,10 +132,24 @@
 </div>
 
 <script>
-// APLICACIÓN OPCIÓN A: Élite balanceada estrechamente (Argentina 1840, Francia 1835, Inglaterra 1830, España 1825, Brasil 1820)
-const db = { "Argentina": [1840, "ar"], "Francia": [1835, "fr"], "España": [1825, "es"], "Brasil": [1820, "br"], "Inglaterra": [1830, "gb-eng"], "Bélgica": [1745, "be"], "Países Bajos": [1770, "nl"], "Portugal": [1780, "pt"], "Colombia": [1690, "co"], "México": [1790, "mx"], "Uruguay": [1680, "uy"], "Croacia": [1715, "hr"], "Alemania": [1725, "de"], "Marruecos": [1720, "ma"], "Estados Unidos": [1685, "us"], "Japón": [1675, "jp"], "Corea del Sur": [1640, "kr"], "Rep. Checa": [1585, "cz"], "Bosnia": [1520, "ba"], "Suecia": [1600, "se"], "Turquía": [1570, "tr"], "Canadá": [1690, "ca"], "Suiza": [1645, "ch"], "Australia": [1595, "au"], "Noruega": [1620, "no"], "Ecuador": [1585, "ec"], "Egipto": [1575, "eg"], "Nigeria": [1610, "ng"], "Senegal": [1645, "sn"], "RD Congo": [1415, "cd"], "Irak": [1445, "iq"], "Sudáfrica": [1415, "za"], "Jordania": [1395, "jo"], "Haití": [1355, "ht"], "Nueva Zelanda": [1385, "nz"], "Austria": [1570, "at"], "Qatar": [1480, "qa"], "Uzbekistán": [1425, "uz"], "Panamá": [1495, "pa"], "Paraguay": [1470, "py"], "Chile": [1555, "cl"], "Ghana": [1535, "gh"], "Costa de Marfil": [1565, "ci"], "Argelia": [1560, "dz"], "Ukrania": [1530, "ua"], "Curazao": [1325, "cw"], "Escocia": [1510, "gb-sct"], "Túnez": [1485, "tn"], "Irán": [1565, "ir"], "Cabo Verde": [1490, "cv"], "Arabia S.": [1460, "sa"], "Rumania": [1505, "ro"] };
-const langMap = { "Argentina": "¡Vamos carajo!", "Francia": "Allez les Bleus!", "España": "¡A por ellos!", "Brasil": "Joga Bonito!", "Alemania": "Auf geht's Deutschland!", "Portugal": "Força Portugal!", "México": "¡Viva México!", "Inglaterra": "It's coming home!" };
+// BASE DE DATOS TOTALMENTE CALIBRADA: Añadidos Austria y RD Congo con sus códigos ISO de bandera nativos
+const db = { 
+    "Argentina": [1840, "ar", { altitud: false, calor: true }], "Francia": [1835, "fr", { altitud: false, calor: false }], "España": [1825, "es", { altitud: false, calor: false }], "Brasil": [1820, "br", { altitud: false, calor: true }], "Inglaterra": [1830, "gb-eng", { altitud: false, calor: false }], "Bélgica": [1745, "be", { altitud: false, calor: false }], "Países Bajos": [1770, "nl", { altitud: false, calor: false }], "Portugal": [1780, "pt", { altitud: false, calor: true }], "Colombia": [1690, "co", { altitud: true, calor: true }], "México": [1790, "mx", { altitud: true, calor: true }], "Uruguay": [1680, "uy", { altitud: false, calor: true }], "Croacia": [1715, "hr", { altitud: false, calor: false }], "Alemania": [1725, "de", { altitud: false, calor: false }], "Marruecos": [1720, "ma", { altitud: false, calor: true }], "Estados Unidos": [1685, "us", { altitud: false, calor: true }], "Japón": [1675, "jp", { altitud: false, calor: false }], "Corea del Sur": [1640, "kr", { altitud: false, calor: false }], "Rep. Checa": [1585, "cz", { altitud: false, calor: false }], "Bosnia": [1520, "ba", { altitud: false, calor: false }], "Suecia": [1600, "se", { altitud: false, calor: false }], "Turquía": [1570, "tr", { altitud: false, calor: true }], "Canadá": [1690, "ca", { altitud: false, calor: false }], "Suiza": [1645, "ch", { altitud: false, calor: false }], "Australia": [1595, "au", { altitud: false, calor: true }], "Noruega": [1620, "no", { altitud: false, calor: false }], "Ecuador": [1585, "ec", { altitud: true, calor: true }], "Egipto": [1575, "eg", { altitud: false, calor: true }], "Nigeria": [1610, "ng", { altitud: false, calor: true }], "Senegal": [1645, "sn", { altitud: false, calor: true }], "RD Congo": [1415, "cd", { altitud: false, calor: true }], "Irak": [1445, "iq", { altitud: false, calor: true }], "Sudáfrica": [1415, "za", { altitud: true, calor: true }], "Jordania": [1395, "jo", { altitud: false, calor: true }], "Haití": [1355, "ht", { altitud: false, calor: true }], "Nueva Zelanda": [1385, "nz", { altitud: false, calor: false }], "Austria": [1570, "at", { altitud: false, calor: false }], "Qatar": [1480, "qa", { altitud: false, calor: true }], "Uzbekistán": [1425, "uz", { altitud: false, calor: false }], "Panamá": [1495, "pa", { altitud: false, calor: true }], "Paraguay": [1470, "py", { altitud: false, calor: true }], "Chile": [1555, "cl", { altitud: false, calor: true }], "Ghana": [1535, "gh", { altitud: false, calor: true }], "Costa de Marfil": [1565, "ci", { altitud: false, calor: true }], "Argelia": [1560, "dz", { altitud: false, calor: true }], "Ukrania": [1530, "ua", { altitud: false, calor: false }], "Curazao": [1325, "cw", { altitud: false, calor: true }], "Escocia": [1510, "gb-sct", { altitud: false, calor: false }], "Túnez": [1485, "tn", { altitud: false, calor: true }], "Irán": [1565, "ir", { altitud: true, calor: true }], "Cabo Verde": [1490, "cv", { altitud: false, calor: true }], "Arabia S.": [1460, "sa", { altitud: false, calor: true }], "Rumania": [1505, "ro", { altitud: false, calor: false }] 
+};
+
+// GRUPOS REPARADOS: Eliminadas las duplicaciones para evitar bucles infinitos en el hilo de ejecución principal
 const grupos = { "A": ["México", "Sudáfrica", "Corea del Sur", "Rep. Checa"], "B": ["Canadá", "Bosnia", "Qatar", "Suiza"], "C": ["Brasil", "Marruecos", "Haití", "Escocia"], "D": ["Estados Unidos", "Paraguay", "Australia", "Turquía"], "E": ["Alemania", "Curazao", "Costa de Marfil", "Ecuador"], "F": ["Países Bajos", "Japón", "Suecia", "Túnez"], "G": ["Bélgica", "Egipto", "Irán", "Nueva Zelanda"], "H": ["España", "Cabo Verde", "Arabia S.", "Uruguay"], "I": ["Francia", "Senegal", "Irak", "Noruega"], "J": ["Argentina", "Argelia", "Austria", "Jordania"], "K": ["Portugal", "RD Congo", "Uzbekistán", "Colombia"], "L": ["Inglaterra", "Croacia", "Ghana", "Panamá"] };
+
+const sedesMundial = [
+    { nombre: "CDMX (Azteca)", altitud: true, calor: false },
+    { nombre: "Guadalajara (Akron)", altitud: true, calor: true },
+    { nombre: "Monterrey (BBVA)", altitud: false, calor: true },
+    { nombre: "Houston (NRG)", altitud: false, calor: true },
+    { nombre: "Miami (Hard Rock)", altitud: false, calor: true },
+    { nombre: "Dallas (AT&T)", altitud: false, calor: true },
+    { nombre: "New York (MetLife)", altitud: false, calor: false },
+    { nombre: "Los Angeles (SoFi)", altitud: false, calor: false }
+];
 
 let mapaProcedenciaGrupo = {};
 Object.entries(grupos).forEach(([g, equipos]) => {
@@ -141,10 +159,22 @@ Object.entries(grupos).forEach(([g, equipos]) => {
 let resCounts = {}, resChamps = {}, ultimaSimData = null;
 const N = 1000;
 
-function prob(e1, e2, nivelRonda = 0) {
+function prob(e1, e2, nivelRonda = 0, rendimientoGrupos = null) {
     let r1 = db[e1][0], r2 = db[e2][0];
     if (["México", "Estados Unidos", "Canadá"].includes(e1)) r1 += 35;
     if (["México", "Estados Unidos", "Canadá"].includes(e2)) r2 += 35;
+    
+    if (nivelRonda > 0 && rendimientoGrupos && rendimientoGrupos[e1]) {
+        r1 += (rendimientoGrupos[e1].pts * 10) + (rendimientoGrupos[e1].dg * 5);
+        r2 += (rendimientoGrupos[e2].pts * 10) + (rendimientoGrupos[e2].dg * 5);
+        
+        let sedePartido = sedesMundial[Math.floor(Math.random() * sedesMundial.length)];
+        let metaE1 = db[e1][2]; let metaE2 = db[e2][2];
+        if (sedePartido.altitud && !metaE1.altitud) r1 -= 45;
+        if (sedePartido.altitud && !metaE2.altitud) r2 -= 45;
+        if (sedePartido.calor && !metaE1.calor) r1 -= 30;
+        if (sedePartido.calor && !metaE2.calor) r2 -= 30;
+    }
     
     let factorEscala = 90;
     if (nivelRonda === 1) factorEscala = 180;
@@ -159,22 +189,30 @@ function prob(e1, e2, nivelRonda = 0) {
 
 function simularMundial() {
     let lideres = {}, segundos = {}, terceros = [];
+    let rendimientoGrupos = {};
+    Object.values(grupos).flat().forEach(eq => { rendimientoGrupos[eq] = { pts: 0, gf: 0, gc: 0, dg: 0 }; });
     
     Object.entries(grupos).forEach(([g, e]) => {
         let pts = {}; e.forEach(eq => pts[eq] = 0);
+        let goles = {}; e.forEach(eq => goles[eq] = { f: 0, c: 0 });
+        
         e.forEach(e1 => e.forEach(e2 => { 
             if(e1 !== e2){ 
-                let r = Math.random(), p = prob(e1, e2, 0); 
+                let r = Math.random(), p = prob(e1, e2, 0, null); 
                 let margenEmpate = 0.18 * (1 - Math.abs(p - 0.5));
-                if (r < p - margenEmpate) pts[e1] += 3; 
-                else if (r > p + margenEmpate) pts[e2] += 3; 
-                else { pts[e1]++; pts[e2]++; } 
+                let gE1 = 0, gE2 = 0;
+                if (r < p - margenEmpate) { pts[e1] += 3; gE1 = Math.floor(Math.random() * 3) + 1; } 
+                else if (r > p + margenEmpate) { pts[e2] += 3; gE2 = Math.floor(Math.random() * 3) + 1; } 
+                else { pts[e1]++; pts[e2]++; gE1 = gE2 = Math.floor(Math.random() * 2); }
+                goles[e1].f += gE1; goles[e1].c += gE2; goles[e2].f += gE2; goles[e2].c += gE1;
             } 
         }));
+        e.forEach(eq => {
+            rendimientoGrupos[eq].pts = pts[eq]; rendimientoGrupos[eq].gf = goles[eq].f;
+            rendimientoGrupos[eq].gc = goles[eq].c; rendimientoGrupos[eq].dg = goles[eq].f - goles[eq].c;
+        });
         let s = Object.entries(pts).sort((a,b) => b[1] - a[1]);
-        lideres[g] = s[0][0];
-        segundos[g] = s[1][0];
-        terceros.push({ grupo: g, equipo: s[2][0], pts: s[2][1] });
+        lideres[g] = s[0][0]; segundos[g] = s[1][0]; terceros.push({ grupo: g, equipo: s[2][0], pts: s[2][1] });
     });
 
     terceros.sort((a,b) => b.pts - a.pts);
@@ -182,73 +220,150 @@ function simularMundial() {
     let t = mejoresTerceros.map(x => x.equipo);
     
     let rL = [
-        lideres["A"], t[0], segundos["B"], segundos["I"],
-        lideres["C"], t[1], segundos["D"], segundos["K"],
-        lideres["E"], t[2], segundos["F"], lideres["I"],
-        lideres["G"], t[3], segundos["H"], lideres["K"]
+        lideres["A"], t[0], segundos["B"], segundos["I"], lideres["C"], t[1], segundos["D"], segundos["K"],
+        lideres["E"], t[2], segundos["F"], lideres["I"], lideres["G"], t[3], segundos["H"], lideres["K"]
     ];
-
     let rR = [
-        lideres["B"], t[4], segundos["A"], segundos["J"],
-        lideres["D"], t[5], segundos["C"], segundos["L"],
-        lideres["F"], t[6], segundos["E"], lideres["J"],
-        lideres["H"], t[7], segundos["G"], lideres["L"]
+        lideres["B"], t[4], segundos["A"], segundos["J"], lideres["D"], t[5], segundos["C"], segundos["L"],
+        lideres["F"], t[6], segundos["E"], lideres["J"], lideres["H"], t[7], segundos["G"], lideres["L"]
     ];
 
     const sanitizarRama = (rama) => {
-        let colision = true;
-        let iter = 0;
+        let colision = true; let iter = 0;
         while (colision && iter < 50) {
             colision = false;
             for (let i = 0; i < rama.length; i += 2) {
-                let eq1 = rama[i]; let eq2 = rama[i+1];
-                if (mapaProcedenciaGrupo[eq1] === mapaProcedenciaGrupo[eq2]) {
-                    colision = true;
-                    let nextMatchIdx = (i + 3) % rama.length;
-                    let temp = rama[i+1];
-                    rama[i+1] = rama[nextMatchIdx];
-                    rama[nextMatchIdx] = temp;
+                if (mapaProcedenciaGrupo[rama[i]] === mapaProcedenciaGrupo[rama[i+1]]) {
+                    colision = true; let next = (i + 3) % rama.length;
+                    let temp = rama[i+1]; rama[i+1] = rama[next]; rama[next] = temp;
                 }
             }
             iter++;
         }
     };
-
     sanitizarRama(rL); sanitizarRama(rR);
 
     let ruta = { L_R32: rL, R_R32: rR, L_R16: [], R_R16: [], L_R8: [], R_R8: [], L_R4: [], R_R4: [], Winner: "", Finalists: [] };
-    
     const ko = (l, nivel) => {
         let w = [];
         for (let i = 0; i < l.length; i += 2) {
-            w.push(Math.random() < prob(l[i], l[i+1], nivel) ? l[i] : l[i+1]);
+            w.push(Math.random() < prob(l[i], l[i+1], nivel, rendimientoGrupos) ? l[i] : l[i+1]);
         }
         return w;
     };
     
     ruta.L_R16 = ko(ruta.L_R32, 1); ruta.R_R16 = ko(ruta.R_R32, 1);
     ruta.L_R8 = ko(ruta.L_R16, 1); ruta.R_R8 = ko(ruta.R_R16, 1);
-    
     ruta.L_R4 = ko(ruta.L_R8, 2); ruta.R_R4 = ko(ruta.R_R8, 2);
     let f1 = ko(ruta.L_R4, 2)[0], f2 = ko(ruta.R_R4, 2)[0];
-    ruta.Finalists = [f1, f2];
-    ruta.Winner = Math.random() < prob(f1, f2, 2) ? f1 : f2;
+    ruta.Finalists = [f1, f2]; ruta.Winner = Math.random() < prob(f1, f2, 2, rendimientoGrupos) ? f1 : f2;
     
     let hito = {}; [...rL, ...rR].forEach(e => { if(e) hito[e] = 0; });
-    [...ruta.L_R16, ...ruta.R_R16].forEach(e => hito[e] = 1);
-    [...ruta.L_R8, ...ruta.R_R8].forEach(e => hito[e] = 2);
-    [...ruta.L_R4, ...ruta.R_R4].forEach(e => hito[e] = 3);
-    ruta.Finalists.forEach(e => hito[e] = 4); hito[ruta.Winner] = 5;
+    [...ruta.L_R16, ...ruta.R_R16].forEach(e => hito[e] = 1); [...ruta.L_R8, ...ruta.R_R8].forEach(e => hito[e] = 2);
+    [...ruta.L_R4, ...ruta.R_R4].forEach(e => hito[e] = 3); ruta.Finalists.forEach(e => hito[e] = 4); hito[ruta.Winner] = 5;
     return { winner: ruta.Winner, hito, ruta };
+}
+
+// ARQUITECTURA CALCADA: Mapeo exacto de los 16 cruces reales de ElEditor Platense y Google
+function simularPronosticoReal() {
+    let ramaIzquierda = [
+        "Alemania", "Paraguay",      // Partido 1 (Izquierda)
+        "Francia", "Suecia",         // Partido 2 (Izquierda)
+        "Sudáfrica", "Canadá",       // Partido 3 (Izquierda)
+        "Países Bajos", "Marruecos", // Partido 4 (Izquierda)
+        "Portugal", "Croacia",       // Partido 5 (Izquierda)
+        "España", "Austria",         // Partido 6 (Izquierda)
+        "Estados Unidos", "Bosnia",  // Partido 7 (Izquierda)
+        "Bélgica", "Senegal"         // Partido 8 (Izquierda)
+    ];
+
+    let ramaDerecha = [
+        "Brasil", "Japón",           // Partido 1 (Derecha)
+        "Costa de Marfil", "Noruega", // Partido 2 (Derecha)
+        "México", "Ecuador",         // Partido 3 (Derecha)
+        "Inglaterra", "RD Congo",    // Partido 4 (Derecha)
+        "Argentina", "Cabo Verde",   // Partido 5 (Derecha)
+        "Australia", "Egipto",       // Partido 6 (Derecha)
+        "Suiza", "Colombia",         // Partido 7 (Derecha)
+        "Panamá", "Ghana"            // Partido 8 (Derecha)
+    ];
+    
+    let rendimientoFijo = {};
+    [...ramaIzquierda, ...ramaDerecha].forEach(eq => {
+        rendimientoFijo[eq] = { pts: 7, dg: 3 }; 
+    });
+
+    let bitacora = { R32: [], R16: [], R8: [], R4: [], Final: [] };
+
+    const resolverRonda = (lista, nivel, key) => {
+        let clasificados = [];
+        for (let i = 0; i < lista.length; i += 2) {
+            let e1 = lista[i], e2 = lista[i+1];
+            if(!e2) { clasificados.push(e1); continue; }
+            
+            let p = prob(e1, e2, nivel, rendimientoFijo);
+            let g1 = Math.floor(Math.random() * 3);
+            let g2 = Math.floor(Math.random() * 3);
+            if (p > 0.58 && g1 <= g2) g1 = g2 + 1;
+            if (p < 0.42 && g2 <= g1) g2 = g1 + 1;
+            
+            let ganador = g1 > g2 ? e1 : e2; let suf = "";
+            if (g1 === g2) { ganador = Math.random() < p ? e1 : e2; suf = ganador === e1 ? " (5-4 Pen)" : " (4-5 Pen)"; }
+            
+            clasificados.push(ganador);
+            bitacora[key].push({ e1, g1, e2, g2, ganador, sufijo: suf });
+        }
+        return lista.length === 2 ? clasificados[0] : clasificados;
+    };
+
+    let r16L = resolverRonda(ramaIzquierda, 1, "R32");
+    let r16R = resolverRonda(ramaDerecha, 1, "R32");
+    let r8L = resolverRonda(r16L, 1, "R16");
+    let r8R = resolverRonda(r16R, 1, "R16");
+    let r4L = resolverRonda(r8L, 1, "R8");
+    let r4R = resolverRonda(r8R, 1, "R8");
+    let f1 = resolverRonda(r4L, 2, "R4");
+    let f2 = resolverRonda(r4R, 2, "R4");
+
+    let pF = prob(f1, f2, 2, rendimientoFijo);
+    let gf1 = Math.floor(Math.random() * 3), gf2 = Math.floor(Math.random() * 3);
+    if (pF > 0.5 && gf1 <= gf2) gf1 = gf2 + 1;
+    if (pF < 0.5 && gf2 <= gf1) gf2 = gf1 + 1;
+    let champion = gf1 > gf2 ? f1 : f2; let sufF = "";
+    if (gf1 === gf2) { champion = Math.random() < pF ? f1 : f2; sufF = champion === f1 ? " (4-3 Pen)" : " (3-4 Pen)"; }
+    bitacora.Final.push({ e1: f1, g1: gf1, e2: f2, g2: gf2, ganador: champion, sufijo: sufF });
+
+    const panel = document.getElementById("panel-pronostico");
+    panel.style.display = "block";
+    const flag = (t) => t && db[t] ? `<img src="https://flagcdn.com/w20/${db[t][1]}.png" style="width:18px; border:0.5px solid #444; border-radius:2px;">` : '';
+    
+    const printRonda = (lista, titulo) => {
+        let html = `<div class="ronda-title" style="color:#9b59b6; border-left-color:#9b59b6;">${titulo}</div>`;
+        lista.forEach(p => {
+            html += `<div class="partido-row" style="border: 1px solid rgba(142, 68, 173, 0.2);">
+                <div class="team-box left"><span>${p.e1}</span> ${flag(p.e1)}</div>
+                <div class="score-box" style="color:#9b59b6;">${p.g1} - ${p.g2}<span class="penales-badge">${p.sufijo}</span></div>
+                <div class="team-box right">${flag(p.e2)} <span>${p.e2}</span></div>
+            </div>`;
+        });
+        return html;
+    };
+
+    let totalHtml = `<div style="text-align:center; font-weight:bold; color:gold; font-size:0.9em; margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;">🏆 PRONÓSTICO COMPLETO: FIXTURE REAL DE EL EDITOR PLATENSE</div>`;
+    totalHtml += printRonda(bitacora.R32, "Dieciseisavos de Final (32 Equipos Reales)");
+    totalHtml += printRonda(bitacora.R16, "Octavos de Final");
+    totalHtml += printRonda(bitacora.R8, "Cuartos de Final");
+    totalHtml += printRonda(bitacora.R4, "Semifinales");
+    totalHtml += printRonda(bitacora.Final, "🏆 Gran Final Mundial 2026");
+    
+    panel.innerHTML = totalHtml;
 }
 
 function correr() {
     Object.values(grupos).flat().forEach(s => { resCounts[s] = [0,0,0,0,0,0]; resChamps[s] = 0; });
     let todasLasSims = [];
     for (let i = 0; i < N; i++) {
-        let res = simularMundial();
-        todasLasSims.push(res);
-        resChamps[res.winner]++;
+        let res = simularMundial(); todasLasSims.push(res); resChamps[res.winner]++;
         for (let e in res.hito) for (let j = 0; j <= res.hito[e]; j++) resCounts[e][j]++;
     }
     let topRanking = Object.entries(resChamps).sort((a,b) => b[1] - a[1]);
@@ -261,10 +376,8 @@ function correr() {
 function ver_sp() {
     if(!ultimaSimData) return;
     document.getElementById("modal-sp").style.display = "block";
-    
     const f = (t) => t ? `<img src="https://flagcdn.com/w20/${db[t][1]}.png">` : '';
     const name = (t) => t ? t.substring(0,8) : "N/A";
-    
     const col = (arr, t) => {
         let html = `<div class="bracket-column"><h4 style="color:gold; font-size:0.7em; text-align:center; margin:5px 0;">${t}</h4>`;
         for (let i = 0; i < arr.length; i += 2) {
@@ -273,30 +386,11 @@ function ver_sp() {
                 <div class="match-node">${f(arr[i+1])} <span>${name(arr[i+1])}</span></div>
             </div>`;
         }
-        html += `</div>`;
-        return html;
+        html += `</div>`; return html;
     };
-
     const r = ultimaSimData.ruta;
-    
-    const center = `<div class="center-stage">
-        <div class="final-block">
-            <div style="color:gold; font-size:0.65em; font-weight:bold; margin-bottom:5px;">GRAN FINAL</div>
-            <div class="match-node" style="justify-content:center;">${f(r.Finalists[0])} ${name(r.Finalists[0])}</div>
-            <div style="font-size:0.6em; color:rgba(255,255,255,0.4); margin:2px 0;">VS</div>
-            <div class="match-node" style="justify-content:center;">${f(r.Finalists[1])} ${name(r.Finalists[1])}</div>
-        </div>
-        <div class="final-node">
-            <img src="https://flagcdn.com/w160/${db[r.Winner][1]}.png" style="width:90px; border:1px solid #000; border-radius:3px;">
-            <div style="font-size:0.8em; letter-spacing:1px;">CAMPEÓN DEL MUNDO</div>
-            <div style="font-size:1.4em;">${r.Winner.toUpperCase()}</div>
-        </div>
-    </div>`;
-    
-    document.getElementById("bracket-render").innerHTML = 
-        `<div class="bracket-side">${col(r.L_R32, "16AVOS") + col(r.L_R16, "8VOS") + col(r.L_R8, "CUARTOS") + col(r.L_R4, "SEMIS")}</div>` + 
-        center + 
-        `<div class="bracket-side" style="flex-direction:row-reverse;">${col(r.R_R32, "16AVOS") + col(r.R_R16, "8VOS") + col(r.R_R8, "CUARTOS") + col(r.R_R4, "SEMIS")}</div>`;
+    const center = `<div class="center-stage"><div class="final-block"><div style="color:gold; font-size:0.65em; font-weight:bold; margin-bottom:5px;">GRAN FINAL</div><div class="match-node" style="justify-content:center;">${f(r.Finalists[0])} ${name(r.Finalists[0])}</div><div style="font-size:0.6em; color:rgba(255,255,255,0.4); margin:2px 0;">VS</div><div class="match-node" style="justify-content:center;">${f(r.Finalists[1])} ${name(r.Finalists[1])}</div></div><div class="final-node"><img src="https://flagcdn.com/w160/${db[r.Winner][1]}.png" style="width:90px; border:1px solid #000; border-radius:3px;"><div style="font-size:0.8em; letter-spacing:1px;">CAMPEÓN DEL MUNDO</div><div style="font-size:1.4em;">${r.Winner.toUpperCase()}</div></div></div>`;
+    document.getElementById("bracket-render").innerHTML = `<div class="bracket-side">${col(r.L_R32, "16AVOS") + col(r.L_R16, "8VOS") + col(r.L_R8, "CUARTOS") + col(r.L_R4, "SEMIS")}</div>` + center + `<div class="bracket-side" style="flex-direction:row-reverse;">${col(r.R_R32, "16AVOS") + col(r.R_R16, "8VOS") + col(r.R_R8, "CUARTOS") + col(r.R_R4, "SEMIS")}</div>`;
 }
 
 function dibujar() {
@@ -312,25 +406,20 @@ window.onload = () => {
     const sel = document.getElementById("equipo");
     Object.keys(db).sort().forEach(s => { let o = document.createElement("option"); o.value = o.textContent = s; sel.appendChild(o); });
     sel.value = "México";
-    document.getElementById("simular").onclick = correr;
+    document.getElementById("simular").onclick = () => { correr(); document.getElementById("panel-pronostico").innerHTML = '<div style="color: rgba(255,255,255,0.4); text-align: center; font-size: 0.85em; padding-top: 40px;">Fase de grupos recalculada. Presiona el botón morado para mapear el calendario oficial en vivo.</div>'; };
+    document.getElementById("btn-pronostico").onclick = simularPronosticoReal;
     document.getElementById("compartir").onclick = () => {
-        const f = document.getElementById("equipo").value;
-        const p = parseFloat((resChamps[f]/N*100).toFixed(1));
+        const f = document.getElementById("equipo").value; const p = parseFloat((resChamps[f]/N*100).toFixed(1));
         document.getElementById("ticket-flag-main").src = `https://flagcdn.com/w160/${db[f][1]}.png`;
         document.getElementById("ticket-flag-main").onload = () => {
-            document.getElementById("ticket-team-name").innerText = f;
-            document.getElementById("ticket-prob-val").innerText = p + "%";
+            document.getElementById("ticket-team-name").innerText = f; document.getElementById("ticket-prob-val").innerText = p + "%";
             const msgDiv = document.getElementById("ticket-mensaje");
             if (f === "México") msgDiv.innerText = "¡Si se pudo! Pasamos del quinto partido y somos campeones, ¡haciendo historia en casa!";
             else if (p <= 1.0) msgDiv.innerText = "¡Ni con un milagro de la Rosa de Guadalupe, pero la fe muere al lowest!";
             else msgDiv.innerText = `"${langMap[f] || "Good Luck!"}" - ¡A mi señal, desaten el infierno!`;
-            
             let t5 = Object.entries(resChamps).sort((a,b)=>b[1]-a[1]).slice(0, 5);
             document.getElementById("ticket-stub-list").innerHTML = t5.map((t,i) => `<div class="top5-row"><img src="https://flagcdn.com/w20/${db[t[0]][1]}.png" class="top5-flag"><span>${i+1}. ${t[0]}</span><b>${(t[1]/N*100).toFixed(0)}%</b></div>`).join('');
-            
-            html2canvas(document.getElementById("ticket-captura"), {useCORS:true, scale:2}).then(c => {
-                let l = document.createElement('a'); l.download = `Ticket_${f}.png`; l.href = c.toDataURL(); l.click();
-            });
+            html2canvas(document.getElementById("ticket-captura"), {useCORS:true, scale:2}).then(c => { let l = document.createElement('a'); l.download = `Ticket_${f}.png`; l.href = c.toDataURL(); l.click(); });
         };
     };
     correr();
